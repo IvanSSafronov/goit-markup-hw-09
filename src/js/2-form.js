@@ -1,51 +1,57 @@
-const formData = {
+const form = document.querySelector('.feedback-form');
+
+const STORAGE_KEY = 'feedback-form-state';
+
+let formData = {
   email: '',
   message: '',
 };
 
-const email = document.querySelector("input[name='email']");
-const message = document.querySelector("textarea[name='message']");
-const form = document.querySelector('.feedback-form');
-const localStorageKey = 'feedback-form-state';
-
-
-const savedData = localStorage.getItem(localStorageKey);
+const savedData = localStorage.getItem(STORAGE_KEY);
 
 if (savedData) {
-  const parsedData = JSON.parse(savedData);
+  try {
+    formData = JSON.parse(savedData);
 
-  formData.email = parsedData.email || '';
-  formData.message = parsedData.message || '';
-
-  email.value = formData.email;
-  message.value = formData.message;
+    Object.entries(formData).forEach(([name, value]) => {
+      if (form.elements[name]) {
+        form.elements[name].value = value;
+      }
+    });
+  } catch (error) {
+    console.log('Ошибка парсинга данных:', error);
+  }
 }
 
-email.addEventListener('input', e => {
-  formData.email = e.target.value;
-  localStorage.setItem(localStorageKey, JSON.stringify(formData));
+form.addEventListener('input', event => {
+  const { name, value } = event.target;
+
+  if (!name) return;
+
+  formData[name] = value.trim();
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
 });
 
-message.addEventListener('input', e => {
-  formData.message = e.target.value;
-  localStorage.setItem(localStorageKey, JSON.stringify(formData));
-});
+form.addEventListener('submit', event => {
+  event.preventDefault();
 
-form.addEventListener('submit', e => {
-  e.preventDefault();
+  const { email, message } = formData;
 
-  if (!formData.email || !formData.message) {
+  if (!email || !message) {
     alert('Fill please all fields');
     return;
   }
 
   console.log(formData);
 
-  localStorage.removeItem(localStorageKey);
   form.reset();
+  localStorage.removeItem(STORAGE_KEY);
 
-  formData.email = '';
-  formData.message = '';
+  formData = {
+    email: '',
+    message: '',
+  };
 });
 //Виконуй це завдання у файлах 2-form.html і 2-form.js. Розбий його на декілька підзавдань:
 
